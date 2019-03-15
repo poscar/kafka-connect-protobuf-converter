@@ -7,7 +7,7 @@
     <groupId>com.github.blueapron</groupId>
     <artifactId>kafka-connect-protobuf-converter</artifactId>
     <packaging>jar</packaging>
-    <version>2.1.0-CONDE</version>
+    <version>2.1.0-CONDE-SNAPSHOT</version>
 
     <properties>
         <protobuf.version>3.4.0</protobuf.version>
@@ -63,13 +63,6 @@
         </dependency>
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
-
     <build>
         <plugins>
             <plugin>
@@ -99,41 +92,44 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>io.confluent</groupId>
-                <artifactId>kafka-connect-maven-plugin</artifactId>
-                <version>0.10.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>kafka-connect</goal>
-                        </goals>
-                        <configuration>
-                            <title>Kafka Connect Protobuf Converter</title>
-                            <documentationUrl>
-                                https://github.com/blueapron/kafka-connect-protobuf-converter/blob/master/README.md
-                            </documentationUrl>
-                            <description>Proto3 converter for Kafka Connect.</description>
-                            <ownerUsername>blueapron</ownerUsername>
-                            <ownerType>organization</ownerType>
-                            <ownerName>Blue Apron, LLC.</ownerName>
-                            <ownerUrl>https://www.blueapron.com/</ownerUrl>
-                            <componentTypes>
-                                <componentType>converter</componentType>
-                            </componentTypes>
-                            <tags>
-                                <tag>proto3</tag>
-                                <tag>protocol buffers</tag>
-                                <tag>protobuf</tag>
-                                <tag>converter</tag>
-                            </tags>
-                            <supportUrl>${project.issueManagement.url}</supportUrl>
-                            <supportSummary>Support provided through community involvement.
-                            </supportSummary>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <configuration>
+                        <releaseProfiles>release</releaseProfiles>
+                        <goals>deploy</goals>
+                        <tagNameFormat>v@{project.version}</tagNameFormat>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.scm</groupId>
+                            <artifactId>maven-scm-provider-gitexe</artifactId>
+                            <version>1.9.5</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <url>http://nexus.conde.io/nexus/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <url>http://nexus.conde.io/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <scm>
+        <connection>scm:git:ssh://git@github.com/poscar/kafka-connect-protobuf-converter.git</connection>
+        <url>https://github.com/poscar/kafka-connect-protobuf-converter</url>
+        <developerConnection>scm:git:ssh://git@github.com/poscar/kafka-connect-protobuf-converter.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 </project>

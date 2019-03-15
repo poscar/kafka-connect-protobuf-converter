@@ -155,3 +155,12 @@ mvn clean package
 Copy the JAR with dependencies (`kafka-connect-protobuf-converter-*-jar-with-dependencies.jar`) to 
 `/usr/share/java/kafka-serde-tools` on your local Kafka Connect instance to make the 
 converter available in Kafka Connect.
+
+## Releasing (At Condé Nast)
+
+1. Ensure all changes are merged into `master`
+2. Ensure you're on branch `master`
+3. Verify your build: `mvn -o clean install`
+4. Dry run: `mvn release:prepare -DdryRun=true`
+5. Release! `mvn release:clean release:prepare release:perform`
+
