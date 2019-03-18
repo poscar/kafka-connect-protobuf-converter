@@ -7,6 +7,7 @@ import com.google.protobuf.Descriptors.OneofDescriptor;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
+import java.util.Collections;
 import org.apache.kafka.connect.data.Date;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
@@ -450,5 +451,47 @@ class ProtobufData {
     } catch (ClassCastException e) {
       throw new DataException("Invalid type for " + schema.type() + ": " + value.getClass());
     }
+  }
+
+  SchemaAndValue getSchemaAndValueWithNulls() {
+    Object value = getValueWithNull(this.schema);
+    return new SchemaAndValue(this.schema, value);
+  }
+
+  private Object getValueWithNull(Schema schema) {
+    if (isProtobufTimestamp(schema) || isProtobufDate(schema)) {
+      return null;
+    }
+
+    Object converted;
+    switch (schema.type()) {
+      // Pass through types
+      case INT32:
+      case INT64:
+      case FLOAT32:
+      case FLOAT64:
+      case BOOLEAN:
+      case STRING:
+      case BYTES:
+      case ARRAY: {
+        converted = null;
+        break;
+      }
+
+      case STRUCT: {
+        final Struct result = new Struct(schema);
+        for (Field field : schema.fields()) {
+          result.put(field.name(), getValueWithNull(field.schema()));
+        }
+
+        converted = result;
+        break;
+      }
+
+      default:
+        throw new DataException("Unknown Connect schema type: " + schema.type());
+    }
+
+    return converted;
   }
 }

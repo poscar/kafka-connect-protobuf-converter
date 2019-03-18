@@ -23,9 +23,13 @@ public class ProtobufConverter implements Converter {
   private static final String FLAT_CONNECT_SCHEMA_FIELD_DELIMITER_CONFIG = "flatConnectSchemaFieldDelimiter";
   private static final String FLAT_CONNECT_SCHEMA_FIELD_DELIMITER_DEFAULT = ".";
 
+  private static final String PROPAGE_NULL_VALUE_CONFIG = "propagateNullValue";
+  private static final boolean PROPAGE_NULL_VALUE_DEFAULT = false;
+
   private ProtobufData protobufData;
   private boolean flatConnectSchema = FLAT_CONNECT_SCHEMA_DEFAULT;
   private String flatConnectSchemaFieldDelimiter = FLAT_CONNECT_SCHEMA_FIELD_DELIMITER_DEFAULT;
+  private boolean propagateNullValue = PROPAGE_NULL_VALUE_DEFAULT;
 
   private boolean isInvalidConfiguration(Object proto, boolean isKey) {
     return proto == null && !isKey;
@@ -49,6 +53,11 @@ public class ProtobufConverter implements Converter {
     Object flatFieldDelimiterConfig = configs.get(FLAT_CONNECT_SCHEMA_FIELD_DELIMITER_CONFIG);
     if (flatFieldDelimiterConfig != null) {
       flatConnectSchemaFieldDelimiter = flatFieldDelimiterConfig.toString();
+    }
+
+    Object propagateNullValueConfig = configs.get(PROPAGE_NULL_VALUE_CONFIG);
+    if (propagateNullValueConfig != null) {
+      propagateNullValue = Boolean.valueOf(propagateNullValueConfig.toString());
     }
 
     if (protoClassName == null) {
@@ -77,11 +86,16 @@ public class ProtobufConverter implements Converter {
 
   @Override
   public SchemaAndValue toConnectData(String topic, byte[] value) {
-    if (protobufData == null || value == null) {
+    if (protobufData == null || (value == null && !propagateNullValue)) {
       return SchemaAndValue.NULL;
     }
 
-    SchemaAndValue connectData = protobufData.toConnectData(value);
+    SchemaAndValue connectData;
+    if (propagateNullValue && value == null) {
+      connectData = protobufData.getSchemaAndValueWithNulls();
+    } else {
+      connectData = protobufData.toConnectData(value);
+    }
 
     // If plugin has been configured to produce a flat schema and we have a Struct at the top level
     // (expected for protobufs), we will create a new SchemaAndValue that brings all fields nested
