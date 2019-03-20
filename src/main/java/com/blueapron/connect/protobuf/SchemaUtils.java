@@ -1,10 +1,10 @@
 package com.blueapron.connect.protobuf;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import javafx.util.Pair;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaAndValue;
@@ -16,7 +16,7 @@ public class SchemaUtils {
     Schema origSchema = connectData.schema();
     Struct origValue = (Struct) connectData.value();
 
-    Pair<Schema, Map<String, Object>> flatSchemaAndValuesMap = createFlatSchemaAndValuesMap(origSchema, origValue, fieldDelimiter);
+    Entry<Schema, Map<String, Object>> flatSchemaAndValuesMap = createFlatSchemaAndValuesMap(origSchema, origValue, fieldDelimiter);
 
     Schema flatSchema = flatSchemaAndValuesMap.getKey();
     Map<String, Object> flatValuesMap = flatSchemaAndValuesMap.getValue();
@@ -24,7 +24,7 @@ public class SchemaUtils {
     return new SchemaAndValue(flatSchema, flatStruct);
   }
 
-  private static Pair<Schema, Map<String, Object>> createFlatSchemaAndValuesMap(Schema origSchema, Struct origValue, String fieldDelimiter) {
+  private static Entry<Schema, Map<String, Object>> createFlatSchemaAndValuesMap(Schema origSchema, Struct origValue, String fieldDelimiter) {
     SchemaBuilder flatSchemaBuilder = SchemaBuilder.struct();
     Map<String, Object> flatValuesMap = new HashMap<>();
     String fieldNamePrefix = "";
@@ -33,7 +33,8 @@ public class SchemaUtils {
     // values map.
     populateFlatSchemaAndValuesMap(flatSchemaBuilder, flatValuesMap, fieldDelimiter, fieldNamePrefix, origSchema, origValue);
 
-    return new Pair<>(flatSchemaBuilder.build(), flatValuesMap);
+
+    return new SimpleImmutableEntry<>(flatSchemaBuilder.build(), flatValuesMap);
   }
 
   private static Struct createPopulatedFlatStruct(Schema flatSchema, Map<String, Object> flatValuesMap) {
