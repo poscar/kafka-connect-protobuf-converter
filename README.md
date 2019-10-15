@@ -158,8 +158,8 @@ converter available in Kafka Connect.
 
 ## Releasing (At Condé Nast)
 
-1. Ensure all changes are merged into `master`
-2. Ensure you're on branch `master`
+1. Ensure all changes are merged into `conde`
+2. Ensure you're on branch `conde`
 3. Verify your build: `mvn -o clean install`
 4. Dry run: `mvn release:prepare -DdryRun=true`
 5. Release! `mvn release:clean release:prepare release:perform`
