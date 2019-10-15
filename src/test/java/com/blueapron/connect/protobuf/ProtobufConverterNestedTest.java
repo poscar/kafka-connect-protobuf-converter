@@ -26,6 +26,11 @@ public class ProtobufConverterNestedTest {
     .setComplexType(ComplexType.newBuilder().setOneId("bar").build())
     .build();
 
+  private static final NestedTestProto NESTED_MESSAGE_NO_COMPLEX_TYPE = NestedTestProto.newBuilder()
+    .setUserId(UserId.newBuilder().setAnotherId(MessageId.newBuilder().setId("foo").build()).build())
+    .setIsActive(true)
+    .build();
+
   private Schema getNestedMessageSchema(String fieldDelimiter) {
     final SchemaBuilder builder = SchemaBuilder.struct();
     builder.field("user_id" + fieldDelimiter + "ba_com_user_id", SchemaBuilder.string().optional().build());
@@ -51,7 +56,23 @@ public class ProtobufConverterNestedTest {
     result.put("updated_at", new Date(0));
     result.put("status", Status.ACTIVE.name());
     result.put("complex_type" + fieldDelimiter + "one_id", "bar");
+    result.put("complex_type" + fieldDelimiter + "other_id", null);
     result.put("complex_type" + fieldDelimiter + "is_active", false);
+    result.put("map_type", Collections.emptyList());
+    return result;
+  }
+
+  private Struct getNestedMessageValueNoComplexType(String fieldDelimiter) {
+    Schema schema = getNestedMessageSchema(fieldDelimiter);
+    Struct result = new Struct(schema.schema());
+    result.put("user_id" + fieldDelimiter + "another_id" + fieldDelimiter + "id", "foo");
+    result.put("is_active", true);
+    result.put("experiments_active", Collections.emptyList());
+    result.put("updated_at", new Date(0));
+    result.put("status", Status.ACTIVE.name());
+    result.put("complex_type" + fieldDelimiter + "one_id", null);
+    result.put("complex_type" + fieldDelimiter + "other_id", null);
+    result.put("complex_type" + fieldDelimiter + "is_active", null);
     result.put("map_type", Collections.emptyList());
     return result;
   }
@@ -76,6 +97,17 @@ public class ProtobufConverterNestedTest {
     ProtobufConverter testMessageConverter = getConfiguredProtobufConverter(TEST_NESTED_MESSAGE_CLASS_NAME, true, fieldDelimiter, false);
     SchemaAndValue result = testMessageConverter.toConnectData("my-topic", NESTED_MESSAGE.toByteArray());
     SchemaAndValue expected = new SchemaAndValue(getNestedMessageSchema(fieldDelimiter), getNestedMessageValue(fieldDelimiter));
+
+    assertEquals(expected, result);
+  }
+
+  @Test
+  public void testToConnectDataForNestedValueIncomplete() {
+    final String fieldDelimiter = "$";
+
+    ProtobufConverter testMessageConverter = getConfiguredProtobufConverter(TEST_NESTED_MESSAGE_CLASS_NAME, true, fieldDelimiter, false);
+    SchemaAndValue result = testMessageConverter.toConnectData("my-topic", NESTED_MESSAGE_NO_COMPLEX_TYPE.toByteArray());
+    SchemaAndValue expected = new SchemaAndValue(getNestedMessageSchema(fieldDelimiter), getNestedMessageValueNoComplexType(fieldDelimiter));
 
     assertEquals(expected, result);
   }

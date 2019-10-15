@@ -51,7 +51,7 @@ public class SchemaUtils {
     for (Field field : schemaFields) {
       Schema fieldSchema = field.schema();
       String fieldName = field.name();
-      Object fieldValue = value.get(fieldName);
+      Object fieldValue = value != null ? value.get(fieldName) : null;
 
       if (fieldSchema.type() == Schema.Type.STRUCT) {
         String newFieldNamePrefix = fieldNamePrefix + fieldName + fieldDelimiter;
